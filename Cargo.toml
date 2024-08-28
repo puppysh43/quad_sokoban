@@ -1,0 +1,8 @@
+[package]
+name = "quad_sokoban"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+bracket-geometry = "0.8.7"
+macroquad = { version = "0.4.12", features = ["audio"] }
