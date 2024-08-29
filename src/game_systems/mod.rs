@@ -7,18 +7,26 @@ pub enum MessageOfIntent {
     None,
     MovePlayer(Point), //point is a delta not the exact location
     Quit,
-    // RestartLevel,
-    // Rewind,
-    // Forward,
+    Reset,
+    Rewind,
+    Forward, //future feature
 }
 pub fn run_systems(state: &mut SokobanState) {
+    //if the game is running for the first time take a snapshot of the current state for the rewind feature aka move 0
+    if state.moves.is_empty() {
+        let first_move = state.get_current_move();
+        state.moves.push(first_move);
+    }
     //get player input as a message of intent
-    let moi = input::player_input();
+    let moi = input::system();
     //process message of intent
     match moi {
         MessageOfIntent::None => do_nothing(state),
         MessageOfIntent::MovePlayer(delta) => process_move(state, delta),
         MessageOfIntent::Quit => quit_game(state),
+        MessageOfIntent::Reset => reset_level(state),
+        MessageOfIntent::Rewind => rewind(state),
+        MessageOfIntent::Forward => forward(state), //currently does nothing
     }
     render(state);
 
@@ -72,10 +80,10 @@ fn process_move(state: &mut SokobanState, delta: Point) {
         state.player = new_player_pos;
         has_moved = true;
     }
-    //then take a snapshot of the state as if
+    //if the player was able to make a legitimate move then increment the movecount and capture the move made
     if has_moved {
-        let move_made = Move::new(state.player, state.crates.clone(), state.movecount);
-        state.moves.push(move_made);
+        state.movecount += 1;
+        state.moves.push(state.get_current_move());
     }
 }
 fn quit_game(state: &mut SokobanState) {
@@ -83,7 +91,6 @@ fn quit_game(state: &mut SokobanState) {
 }
 fn render(state: &mut SokobanState) {
     clear_background(WHITE);
-    //rendering function one that needs to be MOST overhauled
     //first render the game map
     for y in 0..SCREEN_HEIGHT {
         for x in 0..SCREEN_WIDTH {
@@ -135,4 +142,24 @@ fn render(state: &mut SokobanState) {
         (state.player.y * TILE_HEIGHT) as f32,
         WHITE,
     );
+}
+///resets the level by reverting it to the state of the original move captured on level startup
+fn reset_level(state: &mut SokobanState) {
+    let first_move = state.moves[0].clone();
+    state.player = first_move.player;
+    state.crates = first_move.crates;
+    state.movecount = 0;
+    state.moves.clear();
+}
+///this is an unsophisticated rewind function that obliterates the move as it restores it - meaning players cannot
+///freely scroll through all of their moves before deciding where to change course. This works but needs to be changed
+fn rewind(state: &mut SokobanState) {
+    let previous_move = state.moves.pop().clone().unwrap();
+    state.player = previous_move.player;
+    state.crates = previous_move.crates;
+    state.movecount = previous_move.movecount;
+}
+
+fn forward(state: &mut SokobanState) {
+    //this will move back forward through list of moves
 }

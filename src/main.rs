@@ -35,6 +35,9 @@ async fn main() {
     let mut gamestate = SokobanState::from_file("levels/test.txt".to_string(), texture_atlas);
     loop {
         game_systems::run_systems(&mut gamestate);
+        if gamestate.quitting {
+            break;
+        }
         next_frame().await
     }
 }

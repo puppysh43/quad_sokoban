@@ -21,6 +21,7 @@ impl Crate {
     }
 }
 
+#[derive(Clone, Debug, PartialEq)]
 pub struct Move {
     pub player: Point,
     pub crates: HashMap<Point, Crate>,
@@ -48,6 +49,9 @@ impl SokobanState {
             moves: Vec::new(),
             quitting: false,
         }
+    }
+    pub fn get_current_move(&self) -> Move {
+        Move::new(self.player.clone(), self.crates.clone(), self.movecount)
     }
 }
 use std::fs;
