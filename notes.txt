@@ -1,0 +1,18 @@
+need to make some way to decide if the game is using the standard mapset or loading a custom map
+unsure if it should be in the sokoban state itself or a larger appstate value
+leaning towards appstate
+
+- make sure to record number of moves taken to finish the level and note it down as a high score that can be tracked and replaced if a better one is achieved
+
+main menu will have
+
+Play Sokoban
+ - Play Classic Level Pack
+ - Play Custom Level
+Level Editor
+Quit
+
+FOR RIGHT NOW
+just have menu and playing and I guess have the appstate keep track of the max level
+
+Add Sound

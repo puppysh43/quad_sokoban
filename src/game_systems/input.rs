@@ -9,20 +9,19 @@ pub fn system() -> MessageOfIntent {
     if is_key_pressed(KeyCode::Left) && is_key_down(KeyCode::LeftControl)
         || is_key_pressed(KeyCode::Left) && is_key_down(KeyCode::RightControl)
     {
-        println!("I'm trying to rewind the gamestate!");
         return MessageOfIntent::Rewind;
     } else if is_key_pressed(KeyCode::Right) && is_key_down(KeyCode::LeftControl)
         || is_key_pressed(KeyCode::Right) && is_key_down(KeyCode::RightControl)
     {
         return MessageOfIntent::Forward;
-    } else if is_key_pressed(KeyCode::Left) {
-        return MessageOfIntent::MovePlayer(Point::new(-1, 0));
-    } else if is_key_pressed(KeyCode::Right) {
-        return MessageOfIntent::MovePlayer(Point::new(1, 0));
-    } else if is_key_pressed(KeyCode::Up) {
-        return MessageOfIntent::MovePlayer(Point::new(0, -1));
-    } else if is_key_pressed(KeyCode::Down) {
-        return MessageOfIntent::MovePlayer(Point::new(0, 1));
+    } else if is_key_pressed(KeyCode::Left) || is_key_pressed(KeyCode::Kp4) {
+        return MessageOfIntent::MovePlayer(IVec2::new(-1, 0));
+    } else if is_key_pressed(KeyCode::Right) || is_key_pressed(KeyCode::Kp6) {
+        return MessageOfIntent::MovePlayer(IVec2::new(1, 0));
+    } else if is_key_pressed(KeyCode::Up) || is_key_pressed(KeyCode::Kp8) {
+        return MessageOfIntent::MovePlayer(IVec2::new(0, -1));
+    } else if is_key_pressed(KeyCode::Down) || is_key_pressed(KeyCode::Kp2) {
+        return MessageOfIntent::MovePlayer(IVec2::new(0, 1));
     } else if is_key_pressed(KeyCode::Q) && is_key_down(KeyCode::LeftControl)
         || is_key_pressed(KeyCode::Q) && is_key_down(KeyCode::RightControl)
     {

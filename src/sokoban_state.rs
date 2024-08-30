@@ -5,11 +5,12 @@ use macroquad::prelude::*;
 pub struct SokobanState {
     pub texture_atlas: HashMap<String, Texture2D>,
     pub map: Map,
-    pub player: Point,
-    pub crates: HashMap<Point, Crate>,
+    pub player: IVec2,
+    pub crates: HashMap<IVec2, Crate>,
     pub movecount: u32,
     pub moves: Vec<Move>,
     pub quitting: bool,
+    pub has_won: bool,
 }
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub struct Crate {
@@ -23,12 +24,12 @@ impl Crate {
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Move {
-    pub player: Point,
-    pub crates: HashMap<Point, Crate>,
+    pub player: IVec2,
+    pub crates: HashMap<IVec2, Crate>,
     pub movecount: u32,
 }
 impl Move {
-    pub fn new(player: Point, crates: HashMap<Point, Crate>, movecount: u32) -> Self {
+    pub fn new(player: IVec2, crates: HashMap<IVec2, Crate>, movecount: u32) -> Self {
         Self {
             player,
             crates,
@@ -48,14 +49,25 @@ impl SokobanState {
             movecount: 0,
             moves: Vec::new(),
             quitting: false,
+            has_won: false,
         }
+    }
+    pub fn update_from_file(&mut self, path: String) {
+        let (new_map, new_player_spawn, new_crates) = read_data_from_string(path);
+        self.map = new_map;
+        self.player = new_player_spawn;
+        self.crates = new_crates;
+        self.movecount = 0;
+        self.moves.clear();
+        self.quitting = false;
+        self.has_won = false;
     }
     pub fn get_current_move(&self) -> Move {
         Move::new(self.player.clone(), self.crates.clone(), self.movecount)
     }
 }
 use std::fs;
-fn read_data_from_string(path: String) -> (Map, Point, HashMap<Point, Crate>) {
+fn read_data_from_string(path: String) -> (Map, IVec2, HashMap<IVec2, Crate>) {
     //get the raw string from file
     let mut raw_data =
         fs::read_to_string(path).expect("failed to properly read the raw map data string");
@@ -63,8 +75,8 @@ fn read_data_from_string(path: String) -> (Map, Point, HashMap<Point, Crate>) {
     raw_data = raw_data.to_uppercase();
     raw_data.retain(|c| !c.is_whitespace());
     let mut map = Map::new();
-    let mut player_spawn = Point::new(0, 0);
-    let mut crates: HashMap<Point, Crate> = HashMap::new();
+    let mut player_spawn = IVec2::new(0, 0);
+    let mut crates: HashMap<IVec2, Crate> = HashMap::new();
     let mut crate_num = 0;
     let mut index = 0;
     for char in raw_data.chars() {
@@ -97,9 +109,9 @@ fn read_data_from_string(path: String) -> (Map, Point, HashMap<Point, Crate>) {
     return (map, player_spawn, crates);
 }
 
-pub fn index_to_point(idx: usize) -> Point {
+pub fn index_to_point(idx: usize) -> IVec2 {
     let index = idx as i32;
     let x = index % SCREEN_WIDTH;
     let y = index / SCREEN_WIDTH;
-    Point::new(x, y)
+    IVec2::new(x, y)
 }
