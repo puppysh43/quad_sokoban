@@ -1,7 +1,5 @@
-use std::fmt::Display;
-
 use macroquad::prelude::*;
-use sokoban_state::SokobanState;
+use sokoban_state::*;
 mod prelude {
     pub const SCREEN_WIDTH: i32 = 19;
     pub const SCREEN_HEIGHT: i32 = 17;
@@ -13,9 +11,11 @@ use crate::app_state::*;
 use crate::prelude::*;
 mod app_state;
 mod app_systems;
+mod editor_state;
 mod game_systems;
 mod map;
 mod sokoban_state;
+mod victory_screen;
 
 fn window_conf() -> Conf {
     Conf {
@@ -33,7 +33,13 @@ fn window_conf() -> Conf {
 
 #[macroquad::main(window_conf)]
 async fn main() {
-    let mut app_state = AppState::new();
+    //make the necessary appstate instance to launch the program.
+    //currently takes a fed number will later read it from save data
+
+    //first check if there's a save file in the save folder. if so load it if not then generate a new
+    //appstate with a max level of 1
+
+    let mut app_state = AppState::new(2);
     //generate the texture atlas for the game
     let texture_atlas = make_texture_atlas().await;
     //initialize a base game state using a default. the actual level data will be saved later
@@ -41,26 +47,46 @@ async fn main() {
     //temp line to test campaign
     gamestate.update_from_file("levels/campaign/1.txt".to_string());
     loop {
-        if app_state.app_mode == AppMode::Menu {
-            app_systems::run_systems(&mut app_state, &mut gamestate);
-        }
-        while app_state.app_mode == AppMode::Sokoban {
-            game_systems::run_systems(&mut gamestate);
-            if gamestate.quitting {
-                app_state.app_mode = AppMode::Menu;
-                break;
+        match app_state.app_mode {
+            AppMode::Menu(_) => {
+                app_systems::run_systems(&mut app_state, &mut gamestate);
             }
-            next_frame().await
+            AppMode::Sokoban => {
+                loop {
+                    match gamestate.game_state {
+                        GameState::Playing => {
+                            game_systems::run_systems(&mut gamestate);
+                        }
+                        GameState::Quitting => {
+                            app_state.app_mode = AppMode::Menu(MenuMode::Root);
+                            break;
+                        }
+                        GameState::Continuing => {
+                            break;
+                        }
+                        GameState::Won => {
+                            victory_screen::system(&mut gamestate);
+                        }
+                    }
+                    next_frame().await
+                }
+                if gamestate.game_state == GameState::Continuing
+                    && app_state.current_campaign_level < 50
+                {
+                    app_state.current_campaign_level += 1;
+                    gamestate.game_state = GameState::Playing;
+                    //function to update the game's map information to the current campaign map
+                    load_campaign_level(&mut gamestate, app_state.current_campaign_level);
+                }
+            }
+            AppMode::Editor => {
+                //nothing
+            }
         }
         //if the player has won and not quit increment the max level and reset the winning status
-        if gamestate.has_won && app_state.current_level < 50 {
-            app_state.current_level += 1;
-            gamestate.has_won = false;
-            //function to update the game's map information to the current campaign map
-            load_campaign_level(&mut gamestate, app_state.current_level);
-        }
         //this loop break lets the user quit
         if app_state.quitting {
+            //if the player is quitting then save their maxlevel
             break;
         }
         next_frame().await
@@ -92,11 +118,4 @@ async fn make_texture_atlas() -> HashMap<String, Texture2D> {
     ]);
     build_textures_atlas();
     return texture_atlas;
-}
-
-///takes the current level and
-fn load_campaign_level(gamestate: &mut SokobanState, current_level: i32) {
-    //maybe instead of plain numbers it will have "level_" in front of it but for now it's just numbers
-    let path = format!("levels/campaign/{current_level}.txt");
-    gamestate.update_from_file(path);
 }

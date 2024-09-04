@@ -6,8 +6,17 @@ use macroquad::prelude::*;
 pub fn system(state: &mut SokobanState) {
     clear_background(BLACK);
     draw_text("Congratulations! You won!", 0.0, 20.0, 20.0, WHITE);
-    draw_text("Press ENTER to quit", 0.0, 40.0, 20.0, WHITE);
+    draw_text(
+        "Press ENTER to continue or ESC/Q to quit",
+        0.0,
+        40.0,
+        20.0,
+        WHITE,
+    );
     if is_key_down(KeyCode::Enter) {
-        state.quitting = true;
+        state.game_state = GameState::Continuing;
+    }
+    if is_key_down(KeyCode::Q) || is_key_down(KeyCode::Escape) {
+        state.game_state = GameState::Quitting;
     }
 }

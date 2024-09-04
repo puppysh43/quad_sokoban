@@ -9,8 +9,15 @@ pub struct SokobanState {
     pub crates: HashMap<IVec2, Crate>,
     pub movecount: u32,
     pub moves: Vec<Move>,
-    pub quitting: bool,
-    pub has_won: bool,
+    pub game_state: GameState,
+}
+
+#[derive(Copy, Debug, PartialEq, Clone)]
+pub enum GameState {
+    Playing,
+    Quitting,
+    Continuing,
+    Won,
 }
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub struct Crate {
@@ -48,8 +55,7 @@ impl SokobanState {
             crates,
             movecount: 0,
             moves: Vec::new(),
-            quitting: false,
-            has_won: false,
+            game_state: GameState::Playing,
         }
     }
     pub fn update_from_file(&mut self, path: String) {
@@ -59,8 +65,7 @@ impl SokobanState {
         self.crates = new_crates;
         self.movecount = 0;
         self.moves.clear();
-        self.quitting = false;
-        self.has_won = false;
+        self.game_state = GameState::Playing;
     }
     pub fn get_current_move(&self) -> Move {
         Move::new(self.player.clone(), self.crates.clone(), self.movecount)
@@ -114,4 +119,10 @@ pub fn index_to_point(idx: usize) -> IVec2 {
     let x = index % SCREEN_WIDTH;
     let y = index / SCREEN_WIDTH;
     IVec2::new(x, y)
+}
+///takes the current level and loads the relevant gamedata from that file
+pub fn load_campaign_level(gamestate: &mut SokobanState, current_level: i32) {
+    //maybe instead of plain numbers it will have "level_" in front of it but for now it's just numbers
+    let path = format!("levels/campaign/{current_level}.txt");
+    gamestate.update_from_file(path);
 }

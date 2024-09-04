@@ -6,7 +6,6 @@ use macroquad::prelude::*;
 mod input;
 mod process_move;
 mod render;
-mod victory_screen;
 
 pub enum MessageOfIntent {
     None,
@@ -18,36 +17,36 @@ pub enum MessageOfIntent {
 }
 pub fn run_systems(state: &mut SokobanState) {
     //If the player hasn't won the game yet run all the game systems until they do win
-    if !state.has_won {
-        //if the game is running for the first time take a snapshot of the current state for the rewind feature aka move 0
-        if state.moves.is_empty() {
-            let first_move = state.get_current_move();
-            state.moves.push(first_move);
-        }
-        //get player input as a message of intent
-        let moi = input::system();
-        //process message of intent and do the corresponding actions
-        match moi {
-            MessageOfIntent::None => do_nothing(state),
-            MessageOfIntent::MovePlayer(delta) => process_move::system(state, delta),
-            MessageOfIntent::Quit => quit_game(state),
-            MessageOfIntent::Reset => reset_level(state),
-            MessageOfIntent::Rewind => rewind(state),
-            MessageOfIntent::Forward => forward(state), //currently does nothing
-        }
-        render::system(state);
-        //check gamestate for victory condition if so do victory state
-        check_victory(state);
-    } else {
-        //if the player has won show the victory screen and let them press enter to quit
-        victory_screen::system(state);
+    // if state.game_state == GameState::Playing {
+    //if the game is running for the first time take a snapshot of the current state for the rewind feature aka move 0
+    if state.moves.is_empty() {
+        let first_move = state.get_current_move();
+        state.moves.push(first_move);
     }
+    //get player input as a message of intent
+    let moi = input::system();
+    //process message of intent and do the corresponding actions
+    match moi {
+        MessageOfIntent::None => do_nothing(state),
+        MessageOfIntent::MovePlayer(delta) => process_move::system(state, delta),
+        MessageOfIntent::Quit => quit_game(state),
+        MessageOfIntent::Reset => reset_level(state),
+        MessageOfIntent::Rewind => rewind(state),
+        MessageOfIntent::Forward => forward(state), //currently does nothing
+    }
+    render::system(state);
+    //check gamestate for victory condition if so do victory state
+    check_victory(state);
+    // } else {
+    //if the player has won show the victory screen and let them press enter to quit
+    // victory_screen::system(state);
+    // }
 }
 fn do_nothing(state: &mut SokobanState) {
     //do nothing
 }
 fn quit_game(state: &mut SokobanState) {
-    state.quitting = true;
+    state.game_state = GameState::Quitting;
 }
 ///resets the level by reverting it to the state of the original move captured on level startup
 fn reset_level(state: &mut SokobanState) {
@@ -78,5 +77,7 @@ fn check_victory(state: &mut SokobanState) {
             has_won = false;
         }
     }
-    state.has_won = has_won;
+    if has_won {
+        state.game_state = GameState::Won;
+    }
 }
