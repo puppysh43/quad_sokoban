@@ -1,3 +1,4 @@
+use macroquad::audio::*;
 use macroquad::prelude::*;
 use sokoban_state::*;
 mod prelude {
@@ -6,12 +7,15 @@ mod prelude {
     pub const TILE_WIDTH: i32 = 32;
     pub const TILE_HEIGHT: i32 = 32;
     pub use std::collections::HashMap;
+    pub const NUM_TILES: usize = (SCREEN_WIDTH * SCREEN_HEIGHT) as usize;
 }
 use crate::app_state::*;
 use crate::prelude::*;
+use editor_state::*;
 mod app_state;
 mod app_systems;
 mod editor_state;
+mod editor_systems;
 mod game_systems;
 mod map;
 mod sokoban_state;
@@ -42,10 +46,15 @@ async fn main() {
     let mut app_state = AppState::new(2);
     //generate the texture atlas for the game
     let texture_atlas = make_texture_atlas().await;
+    //generate the sound atlas for the game
+    let sound_atlas = make_sound_atlas().await;
     //initialize a base game state using a default. the actual level data will be saved later
-    let mut gamestate = SokobanState::from_file("levels/test.txt".to_string(), texture_atlas);
+    let mut gamestate =
+        SokobanState::from_file("levels/test.txt".to_string(), texture_atlas, sound_atlas);
+    //initialize the editor state
+    let mut editorstate = EditorState::new();
     //temp line to test campaign
-    gamestate.update_from_file("levels/campaign/1.txt".to_string());
+    // gamestate.update_from_file("levels/campaign/1.txt".to_string());
     loop {
         match app_state.app_mode {
             AppMode::Menu(_) => {
@@ -80,6 +89,7 @@ async fn main() {
                 }
             }
             AppMode::Editor => {
+                editor_systems::run_systems(&mut editorstate);
                 //nothing
             }
         }
@@ -118,4 +128,15 @@ async fn make_texture_atlas() -> HashMap<String, Texture2D> {
     ]);
     build_textures_atlas();
     return texture_atlas;
+}
+
+async fn make_sound_atlas() -> HashMap<String, Sound> {
+    set_pc_assets_folder("resources");
+    let wall_collision = load_sound("wall.wav").await.unwrap();
+    let crate_in_spot = load_sound("correct.wav").await.unwrap();
+    let sound_atlas = HashMap::from([
+        (String::from("wall collision"), wall_collision),
+        (String::from("crate in spot"), crate_in_spot),
+    ]);
+    return sound_atlas;
 }

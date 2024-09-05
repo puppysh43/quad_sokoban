@@ -1,6 +1,10 @@
 use crate::prelude::*;
 use crate::sokoban_state::*;
+use macroquad::audio::*;
 use macroquad::prelude::*;
+
+use super::map_idx;
+use super::TileType;
 pub fn system(state: &mut SokobanState, delta: IVec2) {
     //get player position
     let player_pos = state.player;
@@ -28,15 +32,25 @@ pub fn system(state: &mut SokobanState, delta: IVec2) {
                     moving_crate.unwrap(),
                 );
                 has_moved = true;
+                //check if the crate has moved into a loading square and if so play a chime
+                if state.map.tiles[map_idx(new_player_pos.x + delta.x, new_player_pos.y + delta.y)]
+                    == TileType::LoadingSquare
+                {
+                    play_sound_once(state.sound_atlas.get("crate in spot").unwrap());
+                }
             } else {
                 state.crates.insert(new_player_pos, moving_crate.unwrap());
                 //do not move the player at all
+                play_sound_once(state.sound_atlas.get("wall collision").unwrap());
             }
         }
         //if there is no crate being moved just make sure the player can move and move them!
     } else if state.map.can_enter_tile(new_player_pos) && moving_crate.is_none() {
         state.player = new_player_pos;
         has_moved = true;
+    } else {
+        //if the player can't move at all play the sound for hitting a wall
+        play_sound_once(state.sound_atlas.get("wall collision").unwrap());
     }
     //if the player was able to make a legitimate move then increment the movecount and capture the move made
     if has_moved {

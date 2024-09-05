@@ -1,9 +1,11 @@
 use crate::map::*;
 use crate::prelude::*;
+use macroquad::audio::*;
 use macroquad::prelude::*;
 
 pub struct SokobanState {
     pub texture_atlas: HashMap<String, Texture2D>,
+    pub sound_atlas: HashMap<String, Sound>,
     pub map: Map,
     pub player: IVec2,
     pub crates: HashMap<IVec2, Crate>,
@@ -46,10 +48,15 @@ impl Move {
 }
 
 impl SokobanState {
-    pub fn from_file(path: String, texture_atlas: HashMap<String, Texture2D>) -> Self {
+    pub fn from_file(
+        path: String,
+        texture_atlas: HashMap<String, Texture2D>,
+        sound_atlas: HashMap<String, Sound>,
+    ) -> Self {
         let (map, player_spawn, crates) = read_data_from_string(path);
         Self {
             texture_atlas,
+            sound_atlas,
             map,
             player: player_spawn,
             crates,

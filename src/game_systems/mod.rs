@@ -16,8 +16,6 @@ pub enum MessageOfIntent {
     Forward, //future feature
 }
 pub fn run_systems(state: &mut SokobanState) {
-    //If the player hasn't won the game yet run all the game systems until they do win
-    // if state.game_state == GameState::Playing {
     //if the game is running for the first time take a snapshot of the current state for the rewind feature aka move 0
     if state.moves.is_empty() {
         let first_move = state.get_current_move();
@@ -34,13 +32,10 @@ pub fn run_systems(state: &mut SokobanState) {
         MessageOfIntent::Rewind => rewind(state),
         MessageOfIntent::Forward => forward(state), //currently does nothing
     }
+    //render the gamestate onto the screen
     render::system(state);
     //check gamestate for victory condition if so do victory state
     check_victory(state);
-    // } else {
-    //if the player has won show the victory screen and let them press enter to quit
-    // victory_screen::system(state);
-    // }
 }
 fn do_nothing(state: &mut SokobanState) {
     //do nothing
