@@ -49,10 +49,13 @@ async fn main() {
     //generate the sound atlas for the game
     let sound_atlas = make_sound_atlas().await;
     //initialize a base game state using a default. the actual level data will be saved later
-    let mut gamestate =
-        SokobanState::from_file("levels/test.txt".to_string(), texture_atlas, sound_atlas);
+    let mut gamestate = SokobanState::from_file(
+        "levels/test.txt".to_string(),
+        texture_atlas.clone(),
+        sound_atlas.clone(),
+    );
     //initialize the editor state
-    let mut editorstate = EditorState::new();
+    let mut editorstate = EditorState::new(texture_atlas.clone(), sound_atlas.clone());
     //temp line to test campaign
     // gamestate.update_from_file("levels/campaign/1.txt".to_string());
     loop {
@@ -119,12 +122,16 @@ async fn make_texture_atlas() -> HashMap<String, Texture2D> {
     let wall: Texture2D = load_texture("resources/wall.png")
         .await
         .expect("Failed to load texture.");
+    let reticule: Texture2D = load_texture("resources/reticule.png")
+        .await
+        .expect("Failed to load texture.");
     let texture_atlas = HashMap::from([
         (String::from("crate"), boxcrate),
         (String::from("cratespot"), boxspot),
         (String::from("floor"), floor),
         (String::from("player"), player),
         (String::from("wall"), wall),
+        (String::from("reticule"), reticule),
     ]);
     build_textures_atlas();
     return texture_atlas;

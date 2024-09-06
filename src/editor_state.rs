@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use macroquad::audio::*;
 use macroquad::prelude::*;
 ///This struct will hold all the data needed for the level editor
 #[derive(Clone, Debug)]
@@ -8,39 +9,40 @@ pub struct EditorState {
     ///holds the name if present of the level being worked on
     pub map_name: Option<String>,
     ///current brush shape
-    pub brush_shape: BrushShape,
+    pub control_state: EditorControlState,
     ///current brush tile type
     pub brush_type: BrushType,
     ///is the mouse enabled in the editor
     pub mouse_enabled: bool,
+    ///texture atlas
+    pub texture_atlas: HashMap<String, Texture2D>,
+    ///sound atlas
+    pub sound_atlas: HashMap<String, Sound>,
 }
 impl EditorState {
-    pub fn new() -> Self {
+    pub fn new(
+        texture_atlas: HashMap<String, Texture2D>,
+        sound_atlas: HashMap<String, Sound>,
+    ) -> Self {
         Self {
             map: EditorMap::new(),
             map_name: None,
-            brush_shape: BrushShape::None,
+            control_state: EditorControlState::Root,
             brush_type: BrushType::Floor,
             mouse_enabled: false,
+            texture_atlas,
+            sound_atlas,
         }
     }
 }
 ///The kind of brush being used and the information needed to apply that brush to the map
 #[derive(Clone, Debug, PartialEq)]
-pub enum BrushShape {
+pub enum EditorControlState {
     ///For when no brush is selected, like when the
-    None,
+    Root,
     Reticule(IVec2),
+    Saving,
 }
-///Struct that defines a rectangle selection
-/*
-#[derive(Clone, Debug, PartialEq)]
-pub struct RectangleData {
-    ///what kind of tile is being painted into this rectangle
-    pub top_left_vertice: Option<IVec2>,
-    pub bottom_right_vertice: Option<IVec2>,
-    // pub is_hollow: bool,
-}*/
 
 ///The kind of tile or entity that's being placed by the brush
 #[derive(Clone, Debug, PartialEq)]
@@ -64,5 +66,8 @@ impl EditorMap {
         Self {
             tiles: vec![BrushType::Wall; NUM_TILES],
         }
+    }
+    pub fn in_bounds(&self, point: IVec2) -> bool {
+        point.x >= 0 && point.x < SCREEN_WIDTH && point.y >= 0 && point.y < SCREEN_HEIGHT
     }
 }
