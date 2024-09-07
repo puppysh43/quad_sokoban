@@ -1,9 +1,12 @@
 use crate::editor_state::*;
 use crate::map::map_idx;
 use crate::prelude::*;
+use macroquad::audio::*;
 use macroquad::prelude::*;
 
 mod input;
+mod paint_render;
+mod saving;
 
 pub enum EditorMOI {
     None,
@@ -24,10 +27,26 @@ pub fn run_systems(state: &mut EditorState) {
         EditorMOI::PaintTile => {
             //if the user has requested to paint a tile get the pos of the reticule from the control state
             //then apply the selected tiletype of the brush from the state
+
             if let EditorControlState::Reticule(pos) = state.control_state {
-                state.map.tiles[map_idx(pos.x, pos.y)] = state.brush_type.clone();
+                if state.brush_type == BrushType::Player {
+                    //if the user is trying to place down a player then make sure there isn't one already
+                    let mut existing_player = false;
+                    for tile in state.map.tiles.iter() {
+                        if tile == &BrushType::Player {
+                            existing_player = true;
+                        }
+                    }
+                    if !existing_player {
+                        state.map.tiles[map_idx(pos.x, pos.y)] = state.brush_type.clone();
+                    } else {
+                        play_sound_once(state.sound_atlas.get("wall collision").unwrap())
+                    }
+                } else {
+                    //any other type of tile can occur as many times as needed
+                    state.map.tiles[map_idx(pos.x, pos.y)] = state.brush_type.clone();
+                }
             }
-            //WAIT DON'T FORGET to make sure you CHECK there's only ONE player
         }
         //the user is attempting to write out the current map in the editor to the path
         //specified in the app name field of the editor state
@@ -41,6 +60,9 @@ pub fn run_systems(state: &mut EditorState) {
     //still need to render the screen but also need to properly implement the UI stuff for the saving process
     if state.control_state == EditorControlState::Saving {
         //do the saving rendering and ui and stuff
+        saving::system(state);
+    } else {
+        paint_render::system(state);
     }
 
     //handle input, moving the cursor, changing the brush type, etc

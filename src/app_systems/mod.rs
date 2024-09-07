@@ -18,6 +18,10 @@ pub fn run_systems(app_state: &mut AppState, sokoban_state: &mut SokobanState) {
                         app_state.app_mode =
                             AppMode::Menu(MenuMode::Campaign(app_state.max_campaign_level));
                     }
+                    if root_ui().button(Vec2::new(50.0, 100.0), String::from("Launch Editor")) {
+                        //go to the editor launch screen
+                        app_state.app_mode = AppMode::Menu(MenuMode::EditorMenu);
+                    }
                 }
                 MenuMode::Campaign(current_level) => {
                     //Button that launches the campaign level currently selected
@@ -57,7 +61,11 @@ pub fn run_systems(app_state: &mut AppState, sokoban_state: &mut SokobanState) {
                     //
                 }
                 MenuMode::EditorMenu => {
-                    //
+                    //for now just have a button to actually launch the editor state
+                    if root_ui().button(Vec2::new(50.0, 50.0), String::from("Launch Level Editor"))
+                    {
+                        app_state.app_mode = AppMode::Editor;
+                    }
                 }
             }
         }
