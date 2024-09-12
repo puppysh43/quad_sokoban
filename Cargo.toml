@@ -4,6 +4,6 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-macroquad = { version = "0.4.12", features = ["audio"] }
+macroquad = { version = "0.4.13", features = ["audio"] }
 ron = "0.8"
 serde = { version = "1", features = ["derive"] }

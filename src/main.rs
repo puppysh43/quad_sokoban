@@ -1,4 +1,5 @@
 use macroquad::audio::*;
+use macroquad::conf::UpdateTrigger;
 use macroquad::prelude::*;
 use sokoban_state::*;
 mod prelude {
@@ -12,6 +13,8 @@ mod prelude {
 use crate::app_state::*;
 use crate::prelude::*;
 use editor_state::*;
+use std::fs;
+use std::path::Path;
 mod app_state;
 mod app_systems;
 mod editor_state;
@@ -21,29 +24,39 @@ mod map;
 mod sokoban_state;
 mod victory_screen;
 
-fn window_conf() -> Conf {
-    Conf {
-        window_title: "Sokoban Soup".to_string(),
-        window_width: 608,
-        window_height: 544,
-        high_dpi: false,
-        fullscreen: false,
-        sample_count: 1,
-        window_resizable: false,
-        icon: None,
-        ..Default::default()
+fn window_conf() -> macroquad::conf::Conf {
+    macroquad::conf::Conf {
+        miniquad_conf: macroquad::prelude::Conf {
+            window_title: "Sokoban Soup".to_string(),
+            window_width: 608,
+            window_height: 544,
+            high_dpi: false,
+            fullscreen: false,
+            sample_count: 1,
+            window_resizable: false,
+            icon: None,
+            ..Default::default()
+        },
+        update_on: Some(UpdateTrigger::default()),
+        default_filter_mode: FilterMode::Nearest,
     }
 }
 
 #[macroquad::main(window_conf)]
 async fn main() {
     //make the necessary appstate instance to launch the program.
-    //currently takes a fed number will later read it from save data
+    let mut app_state = AppState::new(1);
+    //if a save file exists then load it
+    let save_file = fs::read_to_string("save/save.ron");
+    // if fs::read("save/save.ron").is_ok() {
+    //read the file and change the max level to the number extracted
 
-    //first check if there's a save file in the save folder. if so load it if not then generate a new
-    //appstate with a max level of 1
+    // }
+    if save_file.is_ok() {
+        let save: Save = ron::from_str(&save_file.unwrap()).unwrap();
+        app_state.max_campaign_level = save.max_level();
+    }
 
-    let mut app_state = AppState::new(2);
     //generate the texture atlas for the game
     let texture_atlas = make_texture_atlas().await;
     //generate the sound atlas for the game
@@ -100,11 +113,25 @@ async fn main() {
         //this loop break lets the user quit
         if app_state.quitting {
             //if the player is quitting then save their maxlevel
+            let save = Save::new(app_state.max_campaign_level);
+            let buffer = ron::to_string(&save).unwrap();
+            if fs::write(Path::new("save/save.ron"), buffer.clone()).is_ok() {
+                fs::write(Path::new("save/save.ron"), buffer).unwrap();
+            }
             break;
         }
         next_frame().await
     }
 }
+
+/*
+fn save_world<P: AsRef<Path>>(path: P, world: World) -> Result<()> {
+    let mut f = File::create(path)?;
+    let buf = serde_json::to_vec(&world)?;
+    f.write_all(&buf[..])?;
+    Ok(())
+}
+*/
 
 async fn make_texture_atlas() -> HashMap<String, Texture2D> {
     let boxcrate: Texture2D = load_texture("resources/box.png")
@@ -125,6 +152,7 @@ async fn make_texture_atlas() -> HashMap<String, Texture2D> {
     let reticule: Texture2D = load_texture("resources/reticule.png")
         .await
         .expect("Failed to load texture.");
+
     let texture_atlas = HashMap::from([
         (String::from("crate"), boxcrate),
         (String::from("cratespot"), boxspot),
