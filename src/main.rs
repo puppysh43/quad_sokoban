@@ -48,10 +48,6 @@ async fn main() {
     let mut app_state = AppState::new(1);
     //if a save file exists then load it
     let save_file = fs::read_to_string("save/save.ron");
-    // if fs::read("save/save.ron").is_ok() {
-    //read the file and change the max level to the number extracted
-
-    // }
     if save_file.is_ok() {
         let save: Save = ron::from_str(&save_file.unwrap()).unwrap();
         app_state.max_campaign_level = save.max_level();
@@ -90,7 +86,7 @@ async fn main() {
                             break;
                         }
                         GameState::Won => {
-                            victory_screen::system(&mut gamestate);
+                            victory_screen::system(&mut gamestate, &mut app_state);
                         }
                     }
                     next_frame().await

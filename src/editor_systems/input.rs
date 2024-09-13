@@ -10,7 +10,7 @@ pub fn system(state: &mut EditorState) -> EditorMOI {
                 //press enter to start editing
                 state.control_state = EditorControlState::Reticule(IVec2::new(0, 0));
                 return EditorMOI::None;
-            } else if is_key_pressed(KeyCode::LeftControl) && is_key_pressed(KeyCode::S) {
+            } else if is_key_down(KeyCode::LeftControl) && is_key_pressed(KeyCode::S) {
                 //use control s to try and save
                 state.control_state = EditorControlState::Saving;
                 return EditorMOI::None;

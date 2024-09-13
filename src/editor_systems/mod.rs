@@ -55,6 +55,9 @@ pub fn run_systems(state: &mut EditorState) {
             if state.map_name.is_some() {
                 editor_map_to_txt(&state.map, state.map_name.clone().unwrap());
             }
+            //change control state to root and reset the map state
+            state.control_state = EditorControlState::Root;
+            state.map = EditorMap::new();
         }
     }
     //still need to render the screen but also need to properly implement the UI stuff for the saving process
