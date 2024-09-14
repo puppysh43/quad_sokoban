@@ -58,6 +58,7 @@ pub fn run_systems(state: &mut EditorState) {
             //change control state to root and reset the map state
             state.control_state = EditorControlState::Root;
             state.map = EditorMap::new();
+            state.map_name = Some(String::new());
         }
     }
     //still need to render the screen but also need to properly implement the UI stuff for the saving process
@@ -107,7 +108,7 @@ fn editor_map_to_txt(map: &EditorMap, name: String) {
             }
         }
         //if the collected character is enough to be the same length as the screen width
-        if line.len() == SCREEN_WIDTH as usize {
+        if line.len() == MAP_WIDTH as usize {
             //add it to the main string with a new character file attached.
             final_output.push_str(&line);
             final_output.push_str("\n");

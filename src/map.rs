@@ -10,7 +10,7 @@ pub enum TileType {
 }
 
 pub fn map_idx(x: i32, y: i32) -> usize {
-    ((y * SCREEN_WIDTH) + x) as usize
+    ((y * MAP_WIDTH) + x) as usize
 }
 #[derive(Clone)]
 pub struct Map {
@@ -25,7 +25,7 @@ impl Map {
     }
 
     pub fn in_bounds(&self, point: IVec2) -> bool {
-        point.x >= 0 && point.x < SCREEN_WIDTH && point.y >= 0 && point.y < SCREEN_HEIGHT
+        point.x >= 0 && point.x < MAP_WIDTH && point.y >= 0 && point.y < MAP_HEIGHT
     }
 
     pub fn can_enter_tile(&self, point: IVec2) -> bool {

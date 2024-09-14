@@ -3,12 +3,14 @@ use macroquad::conf::UpdateTrigger;
 use macroquad::prelude::*;
 use sokoban_state::*;
 mod prelude {
-    pub const SCREEN_WIDTH: i32 = 19;
-    pub const SCREEN_HEIGHT: i32 = 17;
+    pub const MAP_WIDTH: i32 = 19;
+    pub const MAP_HEIGHT: i32 = 17;
     pub const TILE_WIDTH: i32 = 32;
     pub const TILE_HEIGHT: i32 = 32;
     pub use std::collections::HashMap;
-    pub const NUM_TILES: usize = (SCREEN_WIDTH * SCREEN_HEIGHT) as usize;
+    pub const NUM_TILES: usize = (MAP_WIDTH * MAP_HEIGHT) as usize;
+    pub const WINDOW_WIDTH: i32 = 800;
+    pub const WINDOW_HEIGHT: i32 = 544;
 }
 use crate::app_state::*;
 use crate::prelude::*;
@@ -28,8 +30,8 @@ fn window_conf() -> macroquad::conf::Conf {
     macroquad::conf::Conf {
         miniquad_conf: macroquad::prelude::Conf {
             window_title: "Sokoban Soup".to_string(),
-            window_width: 608,
-            window_height: 544,
+            window_width: WINDOW_WIDTH,
+            window_height: WINDOW_HEIGHT,
             high_dpi: false,
             fullscreen: false,
             sample_count: 1,
@@ -65,8 +67,6 @@ async fn main() {
     );
     //initialize the editor state
     let mut editorstate = EditorState::new(texture_atlas.clone(), sound_atlas.clone());
-    //temp line to test campaign
-    // gamestate.update_from_file("levels/campaign/1.txt".to_string());
     loop {
         match app_state.app_mode {
             AppMode::Menu(_) => {

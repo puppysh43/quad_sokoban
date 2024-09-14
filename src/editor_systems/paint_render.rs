@@ -4,8 +4,8 @@ use crate::prelude::*;
 use macroquad::prelude::*;
 pub fn system(state: &mut EditorState) {
     clear_background(WHITE);
-    for y in 0..SCREEN_HEIGHT {
-        for x in 0..SCREEN_WIDTH {
+    for y in 0..MAP_HEIGHT {
+        for x in 0..MAP_WIDTH {
             let pt = IVec2::new(x, y);
             let idx = map_idx(x, y);
             if state.map.in_bounds(pt) {

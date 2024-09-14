@@ -5,14 +5,13 @@ use macroquad::prelude::*;
 use macroquad::ui::*;
 
 pub fn run_systems(app_state: &mut AppState, sokoban_state: &mut SokobanState) {
-    //peepeepoopoo
-    //I guess instead of having a bunch of iterative systems it'll be one big stupid UI thing.
     match app_state.app_mode {
         AppMode::Menu(menu_mode) => {
             match menu_mode {
                 //first screen the app opens to
                 MenuMode::Root => {
                     //button to take the player to the player to the campaign screen
+                    clear_background(BLUE);
                     if root_ui().button(Vec2::new(50.0, 50.0), String::from("Play Campaign")) {
                         //go to the campaign screen with the max level as the currently selected level already
                         app_state.app_mode =

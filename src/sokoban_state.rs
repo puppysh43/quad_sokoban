@@ -123,8 +123,8 @@ fn read_data_from_string(path: String) -> (Map, IVec2, HashMap<IVec2, Crate>) {
 
 pub fn index_to_point(idx: usize) -> IVec2 {
     let index = idx as i32;
-    let x = index % SCREEN_WIDTH;
-    let y = index / SCREEN_WIDTH;
+    let x = index % MAP_WIDTH;
+    let y = index / MAP_WIDTH;
     IVec2::new(x, y)
 }
 ///takes the current level and loads the relevant gamedata from that file

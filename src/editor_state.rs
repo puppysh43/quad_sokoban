@@ -68,6 +68,6 @@ impl EditorMap {
         }
     }
     pub fn in_bounds(&self, point: IVec2) -> bool {
-        point.x >= 0 && point.x < SCREEN_WIDTH && point.y >= 0 && point.y < SCREEN_HEIGHT
+        point.x >= 0 && point.x < MAP_WIDTH && point.y >= 0 && point.y < MAP_HEIGHT
     }
 }
